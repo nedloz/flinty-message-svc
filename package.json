@@ -1,0 +1,23 @@
+{
+  "name": "message-svc",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "author": "nedloz",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "dotenv": "^16.5.0",
+    "kafkajs": "^2.2.4",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.13.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

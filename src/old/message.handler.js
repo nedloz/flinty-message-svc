@@ -4,25 +4,23 @@ const { getCollectionName } = require('../utils/collectionName');
 const { encryptContent } = require('../utils/encryption');
 const { produceMessageSaved } = require('../producers/messageSaved.producer');
 const BaseMessageSchema = require('../models/base.message');
-const mongoose = require('mongoose');
 
 async function handleIncomingMessage(data, db) {
   const {
-    chat_type,      // "server", "private", "group"
-    server_id,      // если chat_type === "server"
-    channel_id,     // если chat_type === "server"
-    chat_id,        // если private/group
+    chat_type,
+    _id,
+    channel_id,
     sender_id,
-    content,        // Открытый текст
+    content,
     attachments = [],
     mentions = [],
-    reply_to = null
+    reply_to = null,
   } = data;
 
   const timestamp = Date.now();
   const message_id = uuidv4();
 
-  const collectionName = getCollectionName(chat_type, { server_id, channel_id, chat_id });
+  const collectionName = getCollectionName(chat_type, { _id, channel_id});
 
   const sequence_number = await getNextSequenceNumber(collectionName);
 

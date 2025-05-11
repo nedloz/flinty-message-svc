@@ -6,7 +6,7 @@ const { produceMessageSaved } = require('../producers/messageSaved.producer');
 const BaseMessageSchema = require('../models/base.message');
 const mongoose = require('mongoose');
 
-async function handleIncomingMessage(data, db) {
+async function  handleIncomingMessage(data, db) {
   const {
     chat_type,      // "server", "private", "group"
     server_id,      // если chat_type === "server"

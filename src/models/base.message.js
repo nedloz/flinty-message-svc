@@ -24,9 +24,10 @@ const BaseMessageSchema = new mongoose.Schema({
     default: {}
   },
 
+
   mentions: { type: [String], default: [] },
   reply_to: { type: String, default: null }, // message_id
-
+  is_edited: { type: Boolean, default: false },
   deleted: { type: Boolean, default: false },
   deleted_by: { type: String, default: null },
   deleted_at: { type: Number, default: null }

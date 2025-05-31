@@ -22,13 +22,12 @@ const handleNewMessage = async (data) => {
 
         const collectionName = getCollectionName(chat_type, { target_id, channel_id, sender_id })
 
-        const MessageModel = mongoose.models[collectionName] 
-            ? mongoose.model(collectionName) 
-            : mongoose.model(collectionName, MessageSchema, collectionName);
+        const MessageModel = mongoose.models[collectionName]
+            || mongoose.model(collectionName, MessageSchema, collectionName);
         const message_id = uuidv4();
         const channelId = !channel_id ? target_id : channel_id;
         const sequence_number = await getNextSequenceNumber();
-        const hashedContent = encryptContent(content);
+        const hashedContent = JSON.stringify(encryptContent(content));
         const timestamp = Date.now();
         const message = new MessageModel({
             message_id,
@@ -44,9 +43,20 @@ const handleNewMessage = async (data) => {
         });
 
         await message.save();
-        console.log(`Сохранено сообщение в коллекцию messages_chat_${channelId}`); // logger
-    
-        produceKafkaMessage('message.persisted', message.toObject());
+        console.log(`Сохранено сообщение в коллекцию ${collectionName}`); // logger
+
+        produceKafkaMessage('message.persisted', {
+            message_id,
+            channel_id: channelId,
+            sender_id,
+            sequence_number,
+            content,
+            attachments,
+            reactions: [],
+            mentions,
+            reply_to,
+            timestamp 
+        });
     } catch (err) { 
         err.topic = 'message.saving';
         err.message = err.message || `Message saving error: ${err.message}`

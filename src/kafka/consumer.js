@@ -1,6 +1,6 @@
 const { Kafka } = require('kafkajs');
-const kafka = new Kafka({ brokers: ['localhost:9092'] });
-const consumer = kafka.consumer({ groupId: 'ws-gateway-group' });
+const kafka = new Kafka({ brokers: [process.env.KAFKA_BROKER]});
+const consumer = kafka.consumer({ groupId: process.env.KAFKA_CLIENT_ID });
 const handleNewMessage = require('./handlers/handleNewMessage');
 const handleError = require('./utils/handleError');
 const getHistory = require('./handlers/getHistory');
@@ -10,7 +10,7 @@ const handlers = {
   'message.new': handleNewMessage,
   // 'message.update'
   // 'message.delete'
-  'chat.history.request': getHistory,
+  'chat.history.req': getHistory, // не прописан в ws-gateway
   // 'server.delete'
   // 'server.channel.delete'
   // 'group.chat.delete'
@@ -26,6 +26,7 @@ const errors = [
 const setupKafkaConsumer = async () => {
   await consumer.connect();
   await consumer.subscribe({ topic: 'message.new', fromBeginning: false }) 
+  await consumer.subscribe({ topic: 'chat.history.req', fromBeginning: false }) 
 
   await consumer.run({
     eachMessage: async ({ topic, message }) => {

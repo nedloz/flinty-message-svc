@@ -1,7 +1,6 @@
 const redis = require("../../utils/redisClient");
 
 // не нужна инициализация тк incr создаст новый ключ если не найдет запрошенный
-
 const getNextSequenceNumber = async (chat_id) => {
     try {
         return await redis.incr(`chat:${chat_id}:seq`);

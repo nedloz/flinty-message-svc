@@ -1,3 +1,5 @@
+// Database table schema for message
+
 const mongoose = require('mongoose');
 
 const AttachmentSchema = new mongoose.Schema({

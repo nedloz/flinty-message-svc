@@ -1,3 +1,16 @@
+/**
+ * Генерирует имя коллекции MongoDB для хранения сообщений в зависимости от типа чата
+ * Обеспечивает согласованное именование коллекций для различных типов чатов
+ * 
+ * @param {string} chat_type - Тип чата: 'server', 'private', 'group'
+ * @param {Object} params - Параметры для формирования имени коллекции
+ * @param {string} params.target_id - ID целевого пользователя/чата/сервера
+ * @param {string} params.channel_id - ID канала (только для server чатов)
+ * @param {string} params.sender_id - ID отправителя (только для private чатов)
+ * @returns {string} Имя коллекции MongoDB
+ * @throws {Error} Если отсутствуют обязательные параметры или указан неподдерживаемый тип чата
+ */
+
 function getCollectionName(chat_type, { target_id, channel_id, sender_id }) {
     switch (chat_type) {
       case 'server':

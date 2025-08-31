@@ -5,7 +5,7 @@ const { getCollectionName } = require('../utils/getCollectionName');
 const { v4: uuidv4 } = require('uuid');
 const { getNextSequenceNumber } = require('../utils/SequenceNumber');
 const { produceKafkaMessage } = require('../producer');
-
+const { KAFKA_TOPICS, ERRORS_CONSTANTS } = require('../../utils/constants');
 /**
 * Обрабатывает новое сообщение: сохраняет в соответствующую коллекцию MongoDB и отправляет в Kafka.
 * Создает уникальный ID сообщения, присваивает порядковый номер, шифрует содержимое и сохраняет метаданные.
@@ -75,10 +75,10 @@ const handleNewMessage = async (data) => {
             timestamp 
         }
 
-        return await produceKafkaMessage('message.persisted', response);
+        return await produceKafkaMessage(KAFKA_TOPICS.message_persisted, response);
     } catch (err) { 
-        err.topic = 'message.saving';
-        err.message = err.message || `Message saving error: ${err.message}`
+        err.topic = ERRORS_CONSTANTS.message_saving.topic;
+        err.message = ERRORS_CONSTANTS.message_saving.message(err.message);
         throw err;
     }
 }

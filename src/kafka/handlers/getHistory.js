@@ -4,6 +4,7 @@ const { getCollectionName } = require("../utils/getCollectionName");
 const { produceKafkaMessage } = require("../producer");
 const MessageSchema = require("../../collections/Message");
 const { decryptContent } = require("../utils/encryption");
+const { UNREADABLE_CONTENT, KAFKA_TOPICS, ERRORS_CONSTANTS } = require('../../utils/constants')
 
 // Конфигурационные константы
 const DEFAULT_LIMIT = 20; // Лимит сообщений по умолчанию
@@ -12,10 +13,6 @@ const REDIS_TTL_SECONDS = 60; // Время жизни кэша в Redis (сек
 const HISTORY_END_THRESHOLD = 1; // Порог для определения конца истории
 const REDIS_OFFSET = 0; // Смещение для выборки из Redis
 
-// Строковые константы
-const KAFKA_RESPONSE_TOPIC = 'chat.history.res'; // Топик для ответов Kafka
-const UNREADABLE_CONTENT = '[UNREADABLE]'; // Текст для нечитаемых сообщений
-const ERROR_CODE = 'history.get'; // Код ошибки
 
 /**
  * Основная функция получения истории сообщений
@@ -28,7 +25,7 @@ const getHistory = async (data) => {
 
     if (parsedData.before !== null && parsedData.before <= HISTORY_END_THRESHOLD) {
       const response = getResponse(parsedData);
-      return await produceKafkaMessage(KAFKA_RESPONSE_TOPIC, response);
+      return await produceKafkaMessage(KAFKA_TOPICS.chat_history_response, response);
     }
 
     const redisMessages = await getRedisMessages(redisKey, parsedData);
@@ -36,7 +33,7 @@ const getHistory = async (data) => {
 
     if (parsedRedis.length >= parsedData.limit) {
       const response = getResponse(parsedData, null, parsedRedis, null);
-      return await produceKafkaMessage(KAFKA_RESPONSE_TOPIC, response);
+      return await produceKafkaMessage(KAFKA_TOPICS.chat_history_response, response);
     }
 
     const { mongoMessages, MessageModel, mongoQuery} = await getMongoMessages(parsedRedis, parsedData);
@@ -45,11 +42,11 @@ const getHistory = async (data) => {
     await cacheMongoMessages(mongoMessages, redisKey);
 
     const response = await buildMixedResponse(parsedData, mongoMessages, parsedRedis, MessageModel, mongoQuery);
-    return await produceKafkaMessage(KAFKA_RESPONSE_TOPIC, response);  
+    return await produceKafkaMessage(KAFKA_TOPICS.chat_history_response, response);  
 
   } catch (err) {
-    err.status = ERROR_CODE;
-    err.message = err.message || `Get chat history error`;
+    err.status = ERRORS_CONSTANTS.history_get.topic;
+    err.message = ERRORS_CONSTANTS.history_get.message(err.message);
     throw err;
   }
 };
